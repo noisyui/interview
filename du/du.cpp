@@ -29,6 +29,14 @@ std::wstring readable_fs_kb(uintmax_t size /*in bytes*/);
 bool directory_exists(const char *szPath);
 std::wstring s2ws(const std::string &str);
 
+const wchar_t *GetWC(const char *c)
+{
+    const size_t cSize = strlen(c) + 1;
+    std::wstring wc(cSize, L'#');
+    mbstowcs(&wc[0], c, cSize);
+    return wc.c_str();
+}
+
 void main(int argc, char **argv)
 {
     std::wstring path = s2ws(std::string(argv[1]));
@@ -108,7 +116,7 @@ std::wstring readable_fs_kb(uintmax_t size /*in bytes*/)
 
 bool directory_exists(const char *szPath)
 {
-    DWORD dwAttrib = GetFileAttributes(szPath);
+    DWORD dwAttrib = GetFileAttributesA(szPath);
 
     return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
             (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
