@@ -26,23 +26,17 @@ void printDirInfo(std::wstring path);
 uintmax_t recursive(std::wstring path, DirNode &root);
 char *readable_fs(double size /*in bytes*/, char *buf);
 std::wstring readable_fs_kb(uintmax_t size /*in bytes*/);
-bool directory_exists(const char *szPath);
+bool directory_exists(const wchar_t *szPath);
 std::wstring s2ws(const std::string &str);
+const wchar_t *GetWC(const char *c);
 
-const wchar_t *GetWC(const char *c)
+void wmain(int argc, wchar_t **argv)
 {
-    const size_t cSize = strlen(c) + 1;
-    std::wstring wc(cSize, L'#');
-    mbstowcs(&wc[0], c, cSize);
-    return wc.c_str();
-}
-
-void main(int argc, char **argv)
-{
-    std::wstring path = s2ws(std::string(argv[1]));
+    _setmode(_fileno(stdout), _O_U16TEXT);
+    std::wstring path = std::wstring(argv[1]);
     if (!directory_exists(argv[1]))
     {
-        std::cout << "The root directory does not exist: " << argv[1];
+        std::wcout << "The root directory does not exist: " << argv[1];
         return;
     }
     printDirInfo(path);
@@ -50,7 +44,6 @@ void main(int argc, char **argv)
 
 void printDirInfo(std::wstring root)
 {
-    _setmode(_fileno(stdout), _O_U16TEXT);
     int i = 0;
     for (const auto &entry : fs::directory_iterator(root))
     {
@@ -114,9 +107,9 @@ std::wstring readable_fs_kb(uintmax_t size /*in bytes*/)
     return s2ws(ss.str());
 }
 
-bool directory_exists(const char *szPath)
+bool directory_exists(const wchar_t *szPath)
 {
-    DWORD dwAttrib = GetFileAttributesA(szPath);
+    DWORD dwAttrib = GetFileAttributes(szPath);
 
     return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
             (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
@@ -128,4 +121,12 @@ std::wstring s2ws(const std::string &str)
     std::wstring wstrTo(size_needed, 0);
     MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), &wstrTo[0], size_needed);
     return wstrTo;
+}
+
+const wchar_t *GetWC(const char *c)
+{
+    const size_t cSize = strlen(c) + 1;
+    std::wstring wc(cSize, L'#');
+    mbstowcs(&wc[0], c, cSize);
+    return wc.c_str();
 }
