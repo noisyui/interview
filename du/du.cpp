@@ -26,9 +26,9 @@ void printDirInfo(std::wstring path);
 uintmax_t recursive(std::wstring path, DirNode &root);
 char *readable_fs(double size /*in bytes*/, char *buf);
 std::wstring readable_fs_kb(uintmax_t size /*in bytes*/);
-bool directory_exists(const wchar_t *szPath);
 std::wstring s2ws(const std::string &str);
 const wchar_t *GetWC(const char *c);
+bool directory_exists(const wchar_t *szPath);
 
 void wmain(int argc, wchar_t **argv)
 {
@@ -36,7 +36,7 @@ void wmain(int argc, wchar_t **argv)
     std::wstring path = std::wstring(argv[1]);
     if (!directory_exists(argv[1]))
     {
-        std::wcout << "The root directory does not exist: " << argv[1];
+        std::wcout << L"The root directory does not exist: " << argv[1];
         return;
     }
     printDirInfo(path);
@@ -51,11 +51,11 @@ void printDirInfo(std::wstring root)
         if (entry.is_directory())
         {
             DirNode root;
-            std::wcout << "DIR  " << path << " " << readable_fs_kb(recursive(path, root)) << std::endl;
+            std::wcout << L"DIR  " << path << " " << readable_fs_kb(recursive(path, root)) << std::endl;
         }
         else
         {
-            std::wcout << "FILE " << path << " " << readable_fs_kb(entry.file_size()) << std::endl;
+            std::wcout << L"FILE " << path << " " << readable_fs_kb(entry.file_size()) << std::endl;
         }
     }
 }
@@ -81,19 +81,6 @@ uintmax_t recursive(std::wstring path, DirNode &root)
     return root.totalSize;
 }
 
-char *readable_fs(double size /*in bytes*/, char *buf)
-{
-    int i = 0;
-    const char *units[] = {"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
-    while (size > 1024)
-    {
-        size /= 1024;
-        i++;
-    }
-    sprintf(buf, "%.*f %s", i, size, units[i]);
-    return buf;
-}
-
 std::wstring readable_fs_kb(uintmax_t size /*in bytes*/)
 {
     uintmax_t kb = size / 1024;
@@ -101,15 +88,15 @@ std::wstring readable_fs_kb(uintmax_t size /*in bytes*/)
     {
         kb++;
     }
-    std::stringstream ss;
-    ss.imbue(std::locale("")); // format the size with comma
-    ss << kb << " KB";
-    return s2ws(ss.str());
+    std::wstringstream wss;
+    wss.imbue(std::locale("")); // format the size with comma
+    wss << kb << L" KB";
+    return wss.str();
 }
 
 bool directory_exists(const wchar_t *szPath)
 {
-    DWORD dwAttrib = GetFileAttributes(szPath);
+    DWORD dwAttrib = GetFileAttributesW(szPath);
 
     return (dwAttrib != INVALID_FILE_ATTRIBUTES &&
             (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
@@ -129,4 +116,17 @@ const wchar_t *GetWC(const char *c)
     std::wstring wc(cSize, L'#');
     mbstowcs(&wc[0], c, cSize);
     return wc.c_str();
+}
+
+char *readable_fs(double size /*in bytes*/, char *buf)
+{
+    int i = 0;
+    const char *units[] = {"B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"};
+    while (size > 1024)
+    {
+        size /= 1024;
+        i++;
+    }
+    sprintf(buf, "%.*f %s", i, size, units[i]);
+    return buf;
 }
