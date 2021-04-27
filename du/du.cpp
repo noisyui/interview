@@ -45,6 +45,8 @@ void wmain(int argc, wchar_t **argv)
 {
     _setmode(_fileno(stdout), _O_U16TEXT);
     std::wstring path = std::wstring(argv[1]);
+    // char buf[10];
+    // std::wcout << readable_fs(17864, buf);
     if (!directory_exists(argv[1]))
     {
         std::wcout << L"The root directory does not exist: " << argv[1] << std::endl;
@@ -110,6 +112,9 @@ void recursive(std::wstring path, DirNode *root)
     }
 }
 
+/**
+ * 16,463 KB
+ */ 
 std::wstring readable_fs_kb(uintmax_t size /*in bytes*/)
 {
     uintmax_t kb = size / 1024;
@@ -131,6 +136,9 @@ bool directory_exists(const wchar_t *szPath)
             (dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
+/**
+ * Convert string to wstring 
+ */
 std::wstring s2ws(const std::string &str)
 {
     int size_needed = MultiByteToWideChar(CP_UTF8, 0, &str[0], (int)str.size(), NULL, 0);
@@ -139,6 +147,9 @@ std::wstring s2ws(const std::string &str)
     return wstrTo;
 }
 
+/**
+ * Convert const char * to const wchar_t *
+ */
 const wchar_t *GetWC(const char *c)
 {
     const size_t cSize = strlen(c) + 1;
@@ -147,6 +158,9 @@ const wchar_t *GetWC(const char *c)
     return wc.c_str();
 }
 
+/**
+ * The bigger unit, the more significant digits: 17.4 KB, 2.43MB, 34.456GB
+ */ 
 char *readable_fs(double size /*in bytes*/, char *buf)
 {
     int i = 0;

@@ -26,3 +26,5 @@ process.nextTick(() => {
 });
 
 console.log(9);
+
+// result: 9 5 8 1 4 7 3 6 2
