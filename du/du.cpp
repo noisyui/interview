@@ -19,19 +19,22 @@ class DirNode
 {
 public:
     uintmax_t totalSize = 0;
+    size_t dirCount = 0;
+    size_t fileCount = 0;
     std::unordered_map<std::wstring, DirNode *> dirs;
 
     ~DirNode()
     {
         for (auto const &[dir, node] : dirs)
         {
+            // std::wcout << L"Node to be deleted: " << dir << "    " << node->totalSize << std::endl;
             delete node;
         }
     }
 };
 
 void printDirInfo(std::wstring path);
-uintmax_t recursive(std::wstring path, DirNode *root);
+void recursive(std::wstring path, DirNode *root);
 char *readable_fs(double size /*in bytes*/, char *buf);
 std::wstring readable_fs_kb(uintmax_t size /*in bytes*/);
 std::wstring s2ws(const std::string &str);
@@ -44,7 +47,7 @@ void wmain(int argc, wchar_t **argv)
     std::wstring path = std::wstring(argv[1]);
     if (!directory_exists(argv[1]))
     {
-        std::wcout << L"The root directory does not exist: " << argv[1];
+        std::wcout << L"The root directory does not exist: " << argv[1] << std::endl;
         return;
     }
     printDirInfo(path);
@@ -52,6 +55,7 @@ void wmain(int argc, wchar_t **argv)
 
 void printDirInfo(std::wstring root)
 {
+    const size_t MAX_PATH_LEN = 40;
     DirNode *rootNode = new DirNode();
     recursive(root, rootNode);
 
@@ -59,21 +63,26 @@ void printDirInfo(std::wstring root)
     {
         std::wstring path = entry.path().wstring();
         std::wstring filename = entry.path().filename().wstring();
+        size_t spaceLen = MAX_PATH_LEN > path.size() ? MAX_PATH_LEN - path.size() : 2;
         if (entry.is_directory())
         {
             uintmax_t dirSize = rootNode->dirs.at(filename)->totalSize;
-            std::wcout << L"DIR  " << path << " " << readable_fs_kb(dirSize) << std::endl;
+            std::wcout << L"DIR  " << path << std::wstring(spaceLen, ' ') << readable_fs_kb(dirSize) << std::endl;
         }
         else
         {
-            std::wcout << L"FILE " << path << " " << readable_fs_kb(entry.file_size()) << std::endl;
+            std::wcout << L"FILE " << path << std::wstring(spaceLen, ' ') << readable_fs_kb(entry.file_size()) << std::endl;
         }
     }
 
+    std::wcout << std::endl;
+    std::wcout << L"Total dir count:  " << rootNode->dirCount << std::endl;
+    std::wcout << L"Total file count: " << rootNode->fileCount << std::endl;
+    std::wcout << L"Total file size:  " << readable_fs_kb(rootNode->totalSize) << std::endl;
     delete rootNode;
 }
 
-uintmax_t recursive(std::wstring path, DirNode *root)
+void recursive(std::wstring path, DirNode *root)
 {
     for (const auto &entry : fs::directory_iterator(path))
     {
@@ -83,15 +92,17 @@ uintmax_t recursive(std::wstring path, DirNode *root)
         {
             DirNode *child = new DirNode();
             root->dirs.emplace(filename, child);
-            root->totalSize += recursive(path, child);
+            recursive(path, child);
+            root->dirCount += child->dirCount + 1;
+            root->fileCount += child->fileCount;
+            root->totalSize += child->totalSize;
         }
         else
         {
+            root->fileCount++;
             root->totalSize += entry.file_size();
         }
     }
-
-    return root->totalSize;
 }
 
 std::wstring readable_fs_kb(uintmax_t size /*in bytes*/)
