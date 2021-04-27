@@ -55,24 +55,29 @@ void wmain(int argc, wchar_t **argv)
 
 void printDirInfo(std::wstring root)
 {
-    const size_t MAX_PATH_LEN = 40;
+    const size_t MAX_PATH_LEN = 50;
     DirNode *rootNode = new DirNode();
     recursive(root, rootNode);
 
+    uintmax_t entrySize;
+    std::wstring readableSize;
     for (const auto &entry : fs::directory_iterator(root))
     {
         std::wstring path = entry.path().wstring();
-        std::wstring filename = entry.path().filename().wstring();
-        size_t spaceLen = MAX_PATH_LEN > path.size() ? MAX_PATH_LEN - path.size() : 2;
         if (entry.is_directory())
         {
-            uintmax_t dirSize = rootNode->dirs.at(filename)->totalSize;
-            std::wcout << L"DIR  " << path << std::wstring(spaceLen, ' ') << readable_fs_kb(dirSize) << std::endl;
+            std::wcout << L"DIR  ";
+            std::wstring filename = entry.path().filename().wstring();
+            entrySize = rootNode->dirs.at(filename)->totalSize;
         }
         else
         {
-            std::wcout << L"FILE " << path << std::wstring(spaceLen, ' ') << readable_fs_kb(entry.file_size()) << std::endl;
+            std::wcout << L"FILE ";
+            entrySize = entry.file_size();
         }
+        readableSize = readable_fs_kb(entrySize);
+        size_t spaceLen = MAX_PATH_LEN - path.length() - readableSize.length();
+        std::wcout << std::wstring(5, ' ') << path << std::wstring(spaceLen > 0 ? spaceLen : 2, ' ') << readableSize << std::endl;
     }
 
     std::wcout << std::endl;
