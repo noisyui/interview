@@ -35,11 +35,11 @@ public:
 
 void printDirInfo(std::wstring path);
 void recursive(std::wstring path, DirNode *root);
-char *readable_fs(double size /*in bytes*/, char *buf);
+bool directory_exists(const wchar_t *szPath);
 std::wstring readable_fs_kb(uintmax_t size /*in bytes*/);
 std::wstring s2ws(const std::string &str);
 const wchar_t *GetWC(const char *c);
-bool directory_exists(const wchar_t *szPath);
+char *readable_fs(double size /*in bytes*/, char *buf);
 
 void wmain(int argc, wchar_t **argv)
 {
@@ -57,29 +57,30 @@ void wmain(int argc, wchar_t **argv)
 
 void printDirInfo(std::wstring root)
 {
-    const size_t MAX_PATH_LEN = 50;
     DirNode *rootNode = new DirNode();
     recursive(root, rootNode);
 
+    const size_t MAX_PATH_LEN = 50;
     uintmax_t entrySize;
     std::wstring readableSize;
+    std::wstring entryCategory;
     for (const auto &entry : fs::directory_iterator(root))
     {
         std::wstring path = entry.path().wstring();
         if (entry.is_directory())
         {
-            std::wcout << L"DIR  ";
+            entryCategory = L"DIR  ";
             std::wstring filename = entry.path().filename().wstring();
             entrySize = rootNode->dirs.at(filename)->totalSize;
         }
         else
         {
-            std::wcout << L"FILE ";
+            entryCategory = L"FILE ";
             entrySize = entry.file_size();
         }
         readableSize = readable_fs_kb(entrySize);
         size_t spaceLen = MAX_PATH_LEN - path.length() - readableSize.length();
-        std::wcout << std::wstring(5, ' ') << path << std::wstring(spaceLen > 0 ? spaceLen : 2, ' ') << readableSize << std::endl;
+        std::wcout << entryCategory << std::wstring(5, ' ') << path << std::wstring(spaceLen > 0 ? spaceLen : 2, ' ') << readableSize << std::endl;
     }
 
     std::wcout << std::endl;
@@ -114,7 +115,7 @@ void recursive(std::wstring path, DirNode *root)
 
 /**
  * 16,463 KB
- */ 
+ */
 std::wstring readable_fs_kb(uintmax_t size /*in bytes*/)
 {
     uintmax_t kb = size / 1024;
@@ -160,7 +161,7 @@ const wchar_t *GetWC(const char *c)
 
 /**
  * The bigger unit, the more significant digits: 17.4 KB, 2.43MB, 34.456GB
- */ 
+ */
 char *readable_fs(double size /*in bytes*/, char *buf)
 {
     int i = 0;
