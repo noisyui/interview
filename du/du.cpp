@@ -79,7 +79,8 @@ void printDirInfo(std::wstring root)
             entrySize = entry.file_size();
         }
         readableSize = readable_fs_kb(entrySize);
-        size_t spaceLen = MAX_PATH_LEN - path.length() - readableSize.length();
+        // the type is int not size_t, to prevent overflow
+        int spaceLen = MAX_PATH_LEN - path.length() - readableSize.length();
         std::wcout << entryCategory << std::wstring(5, ' ') << path << std::wstring(spaceLen > 0 ? spaceLen : 2, ' ') << readableSize << std::endl;
     }
 
