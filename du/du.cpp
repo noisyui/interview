@@ -60,13 +60,12 @@ void printDirInfo(std::wstring root)
     DirNode *rootNode = new DirNode();
     recursive(root, rootNode);
 
-    const size_t MAX_PATH_LEN = 50;
+    const size_t MAX_FILE_NAME_LEN = 15;
     uintmax_t entrySize;
     std::wstring readableSize;
     std::wstring entryCategory;
     for (const auto &entry : fs::directory_iterator(root))
     {
-        std::wstring path = entry.path().wstring();
         if (entry.is_directory())
         {
             entryCategory = L"DIR  ";
@@ -80,8 +79,8 @@ void printDirInfo(std::wstring root)
         }
         readableSize = readable_fs_kb(entrySize);
         // the type is int not size_t, to prevent overflow
-        int spaceLen = MAX_PATH_LEN - path.length() - readableSize.length();
-        std::wcout << entryCategory << std::wstring(5, ' ') << path << std::wstring(spaceLen > 0 ? spaceLen : 2, ' ') << readableSize << std::endl;
+        int spaceLen =  MAX_FILE_NAME_LEN - readableSize.length();
+        std::wcout << entryCategory << std::wstring(5, ' ') << entry.path().wstring() << std::wstring(spaceLen > 0 ? spaceLen : 2, ' ') << readableSize << std::endl;
     }
 
     std::wcout << std::endl;
@@ -96,10 +95,10 @@ void recursive(std::wstring path, DirNode *root)
     for (const auto &entry : fs::directory_iterator(path))
     {
         std::wstring path = entry.path().wstring();
-        std::wstring filename = entry.path().filename().wstring();
         if (entry.is_directory())
         {
             DirNode *child = new DirNode();
+            std::wstring filename = entry.path().filename().wstring();
             root->dirs.emplace(filename, child);
             recursive(path, child);
             root->dirCount += child->dirCount + 1;
