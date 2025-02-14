@@ -18,4 +18,4 @@ So 9 bottles of volume 300ml and 16 bottles of volume 500ml should be prepared, 
 
 Actually this a classic problem in math called linear congruence. Here is another general example: 6x % 17 = 3, 
 and the answer will be 9, as 6 * 9 % 17 = 54 % 17 = 3. It will be taken as an example in this function.
-And the algorighm complexity mainly determines by the factor parameter.
+And the algorighm complexity is mainly determined by the factor parameter.
